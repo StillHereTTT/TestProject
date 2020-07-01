@@ -37,9 +37,8 @@ public class SortAsFields {
                 Object o = type.newInstance();
                 //此处类型限制比较大，暂时没有想好如何处理
                 if (o instanceof String) {
-                    o = tValues[i];
+                    declaredField.set(tObject, tValues[i]);
                 }
-                declaredField.set(tObject, o);
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -81,9 +80,8 @@ public class SortAsFields {
                 Object o = type.newInstance();
                 //此处类型限制比较大，暂时没有想好如何处理
                 if (o instanceof String) {
-                    o = tValues[i];
+                    declaredField.set(tObject, tValues[i]);
                 }
-                declaredFields[i].set(tObject, o);
             } catch (InstantiationException e) {
                 e.printStackTrace();
                 tResult = false;
