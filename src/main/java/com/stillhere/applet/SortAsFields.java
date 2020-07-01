@@ -20,7 +20,6 @@ public class SortAsFields {
 
     /**
      * 根据tSortFields内字段的顺序，将tValues的各个值对应的存到tObject对象中，例子可见main方法
-     * 如果使用JDK1.8版本以上，可以使用注解排序
      *
      * @param tObject     传入对象
      * @param tValues     字段对应的值
