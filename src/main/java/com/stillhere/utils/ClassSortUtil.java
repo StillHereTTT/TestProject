@@ -8,4 +8,5 @@ public class ClassSortUtil {
     public static String[] ZXZHXXSetFields = {"ywbs", "xm", "zjlx", "zjhm", "policynum", "policyname", "holdername", "insurantname", "policystatus", "bankname", "policymomeny", "companyname", "policystartdate", "policyenddate", "paidpremium", "lsh", "cxsj", "bxq"};
     //ZQFFXX类中字段顺序
     public static String[] ZQFFXXSetFields = {"ywbs", "xm", "zjlx", "zjhm", "policynum", "insurantname", "companyname", "claimamount", "caseclosedate", "claimreason", "lsh", "cxsj", "bxq", "lqr", "holdername"};
+    public static int a = 0;
 }
