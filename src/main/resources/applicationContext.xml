@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+    <!--
+        此标签用来扫描包以及包下面的类，被扫描到的类就可以使用注解，如@Service等，同时被扫描到后就会被放入IOC容器中，
+        之所以不扫描Controller，就是因为Controller是要交给SpringMVC扫描的，后面会看到
+    -->
+    <context:component-scan base-package="com.stillhere">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--这里引入之前创建的jdbc配置文件，这样可以很灵活的改变配置，而不需要修改xml文件-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!--配置连接池，引入了jdbc.properties以后，就可以很方便的使用配置信息，但是必须要用${}这种形式调用-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driver}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--
+        配置mybatis整合开发
+        Mybatis首先要有一个数据源，所以我们就将刚刚配置的连接池注入进来
+        然后还需要mapper.xml文件的路径，之前学Mybatis的时候都是手动创建**.xml文件，然后用接口去映射，
+        好消息是mybatis能够帮助我们根据数据库逆向生成这个文件及接口，极大的方便了我们的开发
+        最后就是mybatis的配置文件，我们会在后面看到
+        -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mapperLocations" value="classpath:generator/LcbpoDao.xml"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+    </bean>
+
+    <!--
+        配置SqlSession
+        sqlsession的作用就是sql会话，没有这个mybatis就无法真正作用起来，如果你学过mybatis一定知道这个配置的意义，
+        将sqlSessionFactory注入到其中，至于下面那个参数，暂时先不用理解
+        -->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
+        <constructor-arg name="executorType" value="BATCH"/>
+    </bean>
+
+    <!--
+        将dao接口实现放入到IOC容器中，由于我们还没有配置mapper的接口文件，所以需要将接口实现文件放入到IOC中，注入的时候就能够直接使用
+    -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.stillhere.generate"/>
+    </bean>
+
+    <!--
+        事务控制，这个是Spring本身的配置了，如果你不明白的话，还是建议再去学学Spring
+        这个最主要的作用就是：比如插入一条数据出错的时候，前面已经插入到数据库中部分信息，出错了就需要先将数据从数据库中删除，不对数据造成污染
+    -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!--控制数据源-->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--开启基于注解的控制,一般使用配置方式进行控制-->
+    <aop:config>
+        <!--切入点表达式-->
+        <aop:pointcut id="txPoint" expression="execution(* com.stillhere.service..*(..))"/>
+        <!--事务增强配置-->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPoint"/>
+    </aop:config>
+
+    <!--事务增强-->
+    <tx:advice id="txAdvice">
+        <tx:attributes>
+            <tx:method name="*"/>
+            <!--以get开始的所有方法-->
+            <tx:method name="get*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--Spring配置的核心:数据源\mybatis整合\事务控制\事务增强-->
+
+</beans>

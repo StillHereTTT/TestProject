@@ -63,7 +63,7 @@ public class SortAsFields {
     public static Boolean setPojoValues(Object tObject, String[] tValues) {
         Boolean tResult = true;
         //获取类属性，根据testSortInterface注解排序
-        Field[] declaredFields = tObject.getClass().getDeclaredFields();
+        /*Field[] declaredFields = tObject.getClass().getDeclaredFields();
         List<Field> collect = Arrays.stream(declaredFields).filter(field -> {
             if (field.isAnnotationPresent(testSortInterface.class)) {
                 return true;
@@ -89,7 +89,7 @@ public class SortAsFields {
                 e.printStackTrace();
                 tResult = false;
             }
-        }
+        }*/
         return tResult;
     }
 
